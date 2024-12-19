@@ -127,8 +127,8 @@ export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, 
     const handleDistance = levenshtein.get(safeHandle, tweetHandle);
     let nameDistance = levenshtein.get(safeName, displayName);
 
-    if (safeName.length === 0 && displayName.length === 0) 
-      nameDistance = 10; // if both names are empty, ignore this check
+    if (safeName.length < 4 || displayName.length < 4) 
+      nameDistance = 10; // if either of the name is too short, then ignore this check
 
     // if the tweet handle is the same as the page handle, then it's sus. Add red background the tweet
     // [can improve due to false negatives with homoglyphic attacks in the username that cant be detected by equality. maybe use levenshtein distance fuzzy matching on username as well]
