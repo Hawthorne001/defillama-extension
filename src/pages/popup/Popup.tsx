@@ -18,6 +18,7 @@ const Popup = () => {
   const [twitterCashTags, setTwitterCashTags] = useBrowserStorage("local", "settings:twitterCashTags", false,);
   const [twitterHashTags, setTwitterHashTags] = useBrowserStorage("local", "settings:twitterHashTags", false,);
   const [twitterQT, setTwitterQT] = useBrowserStorage("local", "settings:twitterQT", false,);
+  const [twitterBotReplies, setTwitterBotReplies] = useBrowserStorage("local", "settings:twitterBotReplies", false,);
 
   return (
     <Box w="xs" py="4" px="4" userSelect="none">
@@ -95,6 +96,19 @@ const Popup = () => {
             isChecked={twitterQT}
             onChange={(e) => {
               setTwitterQT(e.target.checked);
+              if (!e.target.checked) {
+                Browser.action.setIcon({ path: cuteStatic });
+              }
+            }}
+          />
+        </HStack>
+        <HStack justify="space-between" w="full" pl={7}>
+          <Text fontSize="sm">Hide Bot replies</Text>
+          <Switch
+            size="sm"
+            isChecked={twitterBotReplies}
+            onChange={(e) => {
+              setTwitterBotReplies(e.target.checked);
               if (!e.target.checked) {
                 Browser.action.setIcon({ path: cuteStatic });
               }

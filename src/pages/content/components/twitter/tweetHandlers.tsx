@@ -165,7 +165,7 @@ export function handleHashTag(tweet: HTMLElement, tweetText: string, isLinkedTwe
 }
 
 /**
- * Adds a warning message to the tweet if it contains a cashtag
+ * Adds a warning message to the tweet if it contains a QT
  */
 export function handleQT(tweet: HTMLElement, tweetText: string, isLinkedTweet: boolean) {
   const tweetLength = tweet.querySelectorAll('[data-testid="tweetText"]').length
@@ -175,6 +175,26 @@ export function handleQT(tweet: HTMLElement, tweetText: string, isLinkedTweet: b
   const warningTextContent = `QT detected in this reply.`;
   insertTweetWarningMessage(tweet, isLinkedTweet, warningTextContent);
 }
+
+
+/**
+ * Adds a warning message to the tweet is by a bot
+ */
+export function handleBotReplies(tweet: HTMLElement, _tweetText: string, isLinkedTweet: boolean) {
+  if (isLinkedTweet) return;
+  const tweetTextElement = tweet.querySelector('[data-testid="tweetText"]')
+  if (!tweetTextElement) return;
+  const tweetText = tweetTextElement.textContent
+  const allText = tweet.textContent
+  const hasAutomatedTag = allText.split(tweetText)[0].includes("Automated")
+  if (!hasAutomatedTag) return;
+
+
+  // display warning message on tweet
+  const warningTextContent = `This is a bot reply.`;
+  insertTweetWarningMessage(tweet, isLinkedTweet, warningTextContent);
+}
+
 
 /**
  * Adds a warning message to spam messages

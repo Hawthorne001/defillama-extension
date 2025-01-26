@@ -1,4 +1,7 @@
-import { getTweetInfo, handleAdTweet, handleOpTweet, handleSusTweet, handleTweetWithAddress, handleCashTag, handleHashTag, handleQT, handleSpamQT, } from "./tweetHandlers";
+import {
+  getTweetInfo, handleAdTweet, handleOpTweet, handleSusTweet, handleTweetWithAddress, handleCashTag, handleHashTag, handleQT, handleSpamQT,
+  handleBotReplies,
+} from "./tweetHandlers";
 import levenshtein from "fast-levenshtein";
 
 //
@@ -29,12 +32,13 @@ type TwitterConfig = {
   twitterCashTags: boolean;
   twitterHashTags: boolean;
   twitterQT: boolean;
+  twitterBotReplies: boolean;
 };
 
 /**
  * Analyze tweets (op and replies) on the linked status page
  */
-export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, twitterQT, }: TwitterConfig) {
+export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, twitterQT, twitterBotReplies, }: TwitterConfig) {
   const pathname = window.location.pathname;
 
   // check that the current page is a tweet page (not home/timeline page). Check done here in addition to in init page handler router to catch any edge cases
@@ -108,9 +112,9 @@ export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, 
       handleAdTweet(tweet);
 
       // if the tweet text content consists of only numbers, then it's sus. Add red background the tweet
-      const onlyNumbers = /^[0-9]+$/.test(tweetText)
+      const onlyNumbers = tweetText.length > 1 && /^[0-9]+$/.test(tweetText) // exception make for '4' tweet
       // it is not number but probably gibberish word
-      const gibberish = !onlyNumbers && tweetText.split(" ").length === 1 && /[0-9]/.test(tweetText)  && /[a-z]/.test(tweetText) && /[A-Z]/.test(tweetText) &&  /^[a-zA-Z0-9]+$/.test(tweetText)
+      const gibberish = !onlyNumbers && tweetText.split(" ").length === 1 && /[0-9]/.test(tweetText) && /[a-z]/.test(tweetText) && /[A-Z]/.test(tweetText) && /^[a-zA-Z0-9]+$/.test(tweetText)
       if (onlyNumbers || gibberish) {
         handleSusTweet(tweet, isLinkedTweet, "onlyNumbers", "BG_RED");
         return;
@@ -121,13 +125,14 @@ export async function handleTweetStatusPage({ twitterCashTags, twitterHashTags, 
       if (twitterCashTags && tweetText) handleCashTag(tweet, tweetText, isLinkedTweet);
       if (twitterHashTags && tweetText) handleHashTag(tweet, tweetText, isLinkedTweet);
       if (twitterQT && tweetText) handleQT(tweet, tweetText, isLinkedTweet);
+      if (twitterBotReplies && tweetText) handleBotReplies(tweet, tweetText, isLinkedTweet);
       else handleSpamQT(tweet, isLinkedTweet);
     }
 
     const handleDistance = levenshtein.get(safeHandle, tweetHandle);
     let nameDistance = levenshtein.get(safeName, displayName);
 
-    if (safeName.length === 0 && displayName.length === 0) 
+    if (safeName.length === 0 && displayName.length === 0)
       nameDistance = 10; // if both names are empty, ignore this check
 
     // if the tweet handle is the same as the page handle, then it's sus. Add red background the tweet
